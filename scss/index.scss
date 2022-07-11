@@ -1,0 +1,15 @@
+@import './normalise';
+@import './page-1';
+@import './page-2';
+@import './page-3';
+
+body {
+  font-family: 'Nunito';
+}
+.page {
+  display: none;
+}
+
+.page.active {
+  display: flex;
+}
