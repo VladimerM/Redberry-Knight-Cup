@@ -10,6 +10,10 @@ const inputEmail = document.querySelector('.input__email input');
 const inputTell = document.querySelector('.input__phone input');
 const inputDate = document.querySelector('.input__date input');
 
+const error = document.querySelector('.error');
+const errorTitle = document.querySelector('.error__title span');
+const errorMessage = document.querySelector('.error__message');
+
 let hasKnoladgeValue = false;
 
 let hasExperianceValue = false;
@@ -163,17 +167,33 @@ document.querySelector('.form__inputs').addEventListener('keyup', () => {
   }
 });
 
+function showError(title, message) {
+  errorTitle.textContent = title;
+  errorMessage.textContent = message;
+  error.classList.add('active');
+  setTimeout(() => {
+    error.classList.remove('active');
+  }, 5000);
+}
+
 nextBtn.addEventListener('click', () => {
   if (inputName.value.length < 2) {
+    showError('Invalid Name', 'Please enter valid name');
     return;
   }
   if (!inputEmail.value.match(mailReg)) {
+    showError('Invalid email', 'Please enter valid email');
+
     return;
   }
   if (!inputTell.value.match(tellReg)) {
+    showError('Invalid phone number', 'Please enter valid phone number');
+
     return;
   }
   if (inputDate.value.length === 0) {
+    showError('Invalid date of birth', 'Please enter valid date of birth');
+
     return;
   }
 
