@@ -1,7 +1,21 @@
 const pages = document.querySelectorAll('.page');
 const getStarted = document.querySelector('.start__btn');
 const backBtn = document.querySelectorAll('.buttons__back');
-const nextBtn = document.querySelectorAll('.buttons__next');
+const nextBtn = document.querySelector('.buttons__next');
+
+const doneBtn = document.querySelector('.buttons__done');
+
+const inputName = document.querySelector('.input__name input');
+const inputEmail = document.querySelector('.input__email input');
+const inputTell = document.querySelector('.input__phone input');
+const inputDate = document.querySelector('.input__date input');
+
+let hasKnoladgeValue = false;
+
+let hasExperianceValue = false;
+
+let data;
+
 let validated = true;
 
 let counter = 0;
@@ -26,6 +40,8 @@ knowledgeOption.addEventListener('click', (e) => {
     knowledgeOption.classList.remove('active');
     knowledgeBtn.classList.remove('active');
     knowledgeOptionText.textContent = e.target.textContent;
+    data.experience_level = e.target.textContent;
+    hasKnoladgeValue = true;
   }
 });
 
@@ -58,14 +74,12 @@ experianceOption.addEventListener('click', (e) => {
     experianceOption.classList.remove('active');
     experianceBtn.classList.remove('active');
     experianceOptionText.textContent = e.target.textContent;
+    data.character_id = e.target.id;
+    data.experience = e.target.textContent;
+    hasExperianceValue = true;
   }
 });
 // ======================================== // page-2
-const inputName = document.querySelector('.input__name input');
-const inputEmail = document.querySelector('.input__email input');
-const inputTell = document.querySelector('.input__phone input');
-const inputDate = document.querySelector('.input__date input');
-let data;
 
 if (!localStorage.data) {
   data = {};
@@ -73,17 +87,35 @@ if (!localStorage.data) {
   data = JSON.parse(localStorage.getItem('data'));
   addText();
 }
+
 function addText() {
   if (data.name) inputName.value = data.name;
   document.querySelector('.input__name').classList.add('check');
   if (data.email) inputEmail.value = data.email;
   document.querySelector('.input__email').classList.add('check');
 
-  if (data.tell) inputTell.value = data.tell;
+  if (data.phone) inputTell.value = data.phone;
   document.querySelector('.input__phone').classList.add('check');
 
-  if (data.date) inputDate.value = data.date;
+  if (data.date_of_birth) inputDate.value = data.date_of_birth;
   document.querySelector('.input__date').classList.add('check');
+
+  if (data.experience) {
+    experianceOptionText.textContent = data.experience;
+    hasExperianceValue = true;
+  }
+  if (data.experience_level) {
+    knowledgeOptionText.textContent = data.experience_level;
+    hasKnoladgeValue = true;
+  }
+
+  if (data.already_participated !== undefined) {
+    if (data.already_participated) {
+      document.getElementById('radioYes').checked = true;
+    } else {
+      document.getElementById('radioNo').checked = true;
+    }
+  }
 }
 
 const tellReg = /\d\d\d\d\d\d\d\d\d/gm;
@@ -131,51 +163,82 @@ document.querySelector('.form__inputs').addEventListener('keyup', () => {
   }
 });
 
-nextBtn.forEach((item) =>
-  item.addEventListener('click', () => {
-    if (inputName.value.length < 2) {
-      return;
-    }
-    if (!inputEmail.value.match(mailReg)) {
-      return;
-    }
-    if (!inputTell.value.match(tellReg)) {
-      return;
-    }
-    if (inputDate.value.length === 0) {
-      return;
-    }
+nextBtn.addEventListener('click', () => {
+  if (inputName.value.length < 2) {
+    return;
+  }
+  if (!inputEmail.value.match(mailReg)) {
+    return;
+  }
+  if (!inputTell.value.match(tellReg)) {
+    return;
+  }
+  if (inputDate.value.length === 0) {
+    return;
+  }
 
-    data.name = inputName.value;
-    data.email = inputEmail.value;
-    data.tell = inputTell.value;
-    data.date = inputDate.value;
+  data.name = inputName.value;
+  data.email = inputEmail.value;
+  data.phone = inputTell.value;
+  data.date_of_birth = inputDate.value;
 
-    localStorage.setItem('data', JSON.stringify(data));
-    pages[counter].classList.remove('active');
-    counter++;
-    pages[counter].classList.add('active');
-  })
-);
+  localStorage.setItem('data', JSON.stringify(data));
+  pages[counter].classList.remove('active');
+  counter++;
+  pages[counter].classList.add('active');
+});
 
-if (data.name && data.email && data.tell && data.date) {
+doneBtn.addEventListener('click', () => {
+  if (!hasKnoladgeValue) {
+    return;
+  }
+  if (!hasExperianceValue) {
+    return;
+  }
+  if (
+    document.getElementById('radioYes').checked === false &&
+    document.getElementById('radioNo').checked === false
+  ) {
+    return;
+  } else if (document.getElementById('radioYes').checked === true) {
+    console.log(1);
+    data.already_participated = true;
+  } else if (document.getElementById('radioNo').checked === true) {
+    console.log(2);
+
+    data.already_participated = false;
+  }
+
+  localStorage.setItem('data', JSON.stringify(data));
+  pages[counter].classList.remove('active');
+  counter++;
+  pages[counter].classList.add('active');
+});
+
+if (data.name && data.email && data.phone && data.date_of_birth) {
   document.querySelector(
     '.pages-form__num'
   ).innerHTML = `<img src="./images/icons/check.png" alt="">`;
 }
 
 // =================================== //
-let dataChess = [];
 
-function send(url) {
-  fetch(url).then((res) => {
-    let fetchData = res
-      .json()
-      .then((data) => data.forEach((item) => dataChess.push(item)));
-    return fetchData;
-  });
-}
-
-dataChess.forEach((item) => {
-  experianceOption.innerHTML += `${item.name}`;
-});
+fetch('https://chess-tournament-api.devtest.ge/api/grandmasters').then(
+  (res) => {
+    res.json().then((data) => {
+      data.forEach(
+        (item) =>
+          (experianceOption.innerHTML += `
+            <div class="knowledge__select" id="${item.id}">
+              ${item.name}
+              <img
+                src="./images/people${item.image}"
+                alt=""
+                width="50"
+                height="50"
+              />
+            </div>`)
+      );
+    });
+  }
+);

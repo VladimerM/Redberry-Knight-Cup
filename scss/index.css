@@ -625,6 +625,16 @@ h6 {
   margin-right: 16px;
 }
 
+.page-4 .banner {
+  background-image: url(../images/bg-images/4.jpg);
+}
+.page-4 .main__finish {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
 body {
   font-family: "Nunito";
 }
